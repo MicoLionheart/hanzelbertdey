@@ -23,58 +23,83 @@ function calculateAge() {
 
 ageElement.textContent = calculateAge();
 
-const messageForm = document.getElementById('messageForm');
-const userNameInput = document.getElementById('userName');
-const userMessageInput = document.getElementById('userMessage');
-const messageList = document.getElementById('messageList').querySelector('ul');
-const archivedMessages = document.getElementById('archivedMessages').querySelector('ul');
-const archivedSection = document.getElementById('archivedMessages');
+// Import and configure Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-let allMessages = JSON.parse(localStorage.getItem('messages')) || [];
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
 
-messageForm.addEventListener('submit', function (e) {
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// DOM Elements
+const messageForm = document.getElementById("messageForm");
+const userNameInput = document.getElementById("userName");
+const userMessageInput = document.getElementById("userMessage");
+const messageList = document.getElementById("messageList").querySelector("ul");
+const archivedSection = document.getElementById("archivedMessages");
+const archivedMessages = archivedSection.querySelector("ul");
+
+// Firestore collection reference
+const messagesCollection = collection(db, "messages");
+
+// Submit message
+messageForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const userName = userNameInput.value.trim();
   const userMessage = userMessageInput.value.trim();
 
   if (userName && userMessage) {
-    allMessages.unshift({ name: userName, message: userMessage });
+    try {
+      // Add message to Firestore
+      await addDoc(messagesCollection, {
+        name: userName,
+        message: userMessage,
+        timestamp: new Date(), // Add a timestamp
+      });
 
-    localStorage.setItem('messages', JSON.stringify(allMessages));
-
-    updateMessageList();
-
-    userNameInput.value = '';
-    userMessageInput.value = '';
+      // Clear form
+      userNameInput.value = "";
+      userMessageInput.value = "";
+    } catch (error) {
+      console.error("Error adding message: ", error);
+    }
   }
 });
 
-function updateMessageList() {
-  messageList.innerHTML = '';
-  archivedMessages.innerHTML = '';
+// Listen for new messages
+const messagesQuery = query(messagesCollection, orderBy("timestamp", "desc"), limit(20));
+onSnapshot(messagesQuery, (snapshot) => {
+  const currentMessages = [];
+  snapshot.forEach((doc) => {
+    currentMessages.push({ id: doc.id, ...doc.data() });
+  });
 
-  const currentMessages = allMessages.slice(0, 20);
-  currentMessages.forEach((msg) => {
-    const li = document.createElement('li');
+  // Render messages
+  renderMessages(currentMessages);
+});
+
+function renderMessages(messages) {
+  // Clear current list
+  messageList.innerHTML = "";
+
+  // Render messages
+  messages.forEach((msg) => {
+    const li = document.createElement("li");
     li.innerHTML = `<strong>${msg.name}:</strong> ${msg.message}`;
     messageList.appendChild(li);
   });
-
-  const olderMessages = allMessages.slice(20);
-  if (olderMessages.length > 0) {
-    archivedSection.style.display = 'block';
-    olderMessages.forEach((msg) => {
-      const li = document.createElement('li');
-      li.innerHTML = `<strong>${msg.name}:</strong> ${msg.message}`;
-      archivedMessages.appendChild(li);
-    });
-  } else {
-    archivedSection.style.display = 'none';
-  }
 }
-
-updateMessageList();
 
 
 document.addEventListener("DOMContentLoaded", () => {
