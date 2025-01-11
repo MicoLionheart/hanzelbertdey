@@ -11,11 +11,13 @@ function calculateAge() {
   const birthYear = birthDate.getFullYear();
   const currentYear = today.getFullYear();
   
+  // Calculate initial age
   let age = currentYear - birthYear;
 
+  // Check if the birthday has occurred this year
   const birthdayThisYear = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
   if (today < birthdayThisYear) {
-    age -= 1;
+    age -= 1; // Subtract 1 if the birthday hasn't occurred yet
   }
   
   return age;
@@ -74,7 +76,7 @@ function updateMessageList() {
   }
 }
 
-updateMessageList();
+updateMessageList(); 
 
 
 document.addEventListener("DOMContentLoaded", () => {
