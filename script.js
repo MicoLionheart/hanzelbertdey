@@ -76,7 +76,6 @@ function updateMessageList() {
 
 updateMessageList();
 
-
 document.addEventListener("DOMContentLoaded", () => {
     const gallerySection = document.querySelector(".gallery");
     const leftAnimation = document.querySelector(".left-animation");
