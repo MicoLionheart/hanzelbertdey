@@ -3,101 +3,79 @@ document.addEventListener("DOMContentLoaded", () => {
     header.classList.add("fade-in");
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const birthDate = new Date("2001-01-10");
-  const ageElement = document.getElementById("age");
+const birthDate = new Date("2001-01-10");
+const ageElement = document.getElementById("age");
 
-  function calculateAge() {
-    const today = new Date();
-    const birthYear = birthDate.getFullYear();
-    const currentYear = today.getFullYear();
+function calculateAge() {
+  const today = new Date();
+  const birthYear = birthDate.getFullYear();
+  const currentYear = today.getFullYear();
+  
+  let age = currentYear - birthYear;
 
-    let age = currentYear - birthYear;
-
-    const birthdayThisYear = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
-    if (today < birthdayThisYear) {
-      age -= 1;
-    }
-
-    return age;
+  const birthdayThisYear = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+  if (today < birthdayThisYear) {
+    age -= 1;
   }
+  
+  return age;
+}
 
-  ageElement.textContent = calculateAge();
+ageElement.textContent = calculateAge();
 
-  // Firebase Initialization
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+const messageForm = document.getElementById('messageForm');
+const userNameInput = document.getElementById('userName');
+const userMessageInput = document.getElementById('userMessage');
+const messageList = document.getElementById('messageList').querySelector('ul');
+const archivedMessages = document.getElementById('archivedMessages').querySelector('ul');
+const archivedSection = document.getElementById('archivedMessages');
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCSqU4pgisamP0COljueM41yNsg3SfISzw",
-    authDomain: "happy-birthday-e2a9b.firebaseapp.com",
-    projectId: "happy-birthday-e2a9b",
-    storageBucket: "happy-birthday-e2a9b.appspot.com",
-    messagingSenderId: "104922178251",
-    appId: "1:104922178251:web:ff25bb5231c48cfd77314e",
-  };
+let allMessages = JSON.parse(localStorage.getItem('messages')) || [];
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+messageForm.addEventListener('submit', function (e) {
+  e.preventDefault();
 
-  // DOM Elements
-  const messageForm = document.getElementById("messageForm");
-  const userNameInput = document.getElementById("userName");
-  const userMessageInput = document.getElementById("userMessage");
-  const messageList = document.getElementById("messageList").querySelector("ul");
+  const userName = userNameInput.value.trim();
+  const userMessage = userMessageInput.value.trim();
 
-  // Firestore collection reference
-  const messagesCollection = collection(db, "messages");
+  if (userName && userMessage) {
+    allMessages.unshift({ name: userName, message: userMessage });
 
-  // Submit message
-  messageForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    localStorage.setItem('messages', JSON.stringify(allMessages));
 
-    const userName = userNameInput.value.trim();
-    const userMessage = userMessageInput.value.trim();
+    updateMessageList();
 
-    if (userName && userMessage) {
-      try {
-        // Add message to Firestore
-        await addDoc(messagesCollection, {
-          name: userName,
-          message: userMessage,
-          timestamp: new Date(), // Add a timestamp
-        });
-
-        // Clear form
-        userNameInput.value = "";
-        userMessageInput.value = "";
-      } catch (error) {
-        console.error("Error adding message: ", error);
-      }
-    }
-  });
-
-  // Listen for new messages
-  const messagesQuery = query(messagesCollection, orderBy("timestamp", "desc"));
-  onSnapshot(messagesQuery, (snapshot) => {
-    const currentMessages = [];
-    snapshot.forEach((doc) => {
-      currentMessages.push({ id: doc.id, ...doc.data() });
-    });
-
-    // Render messages
-    renderMessages(currentMessages);
-  });
-
-  function renderMessages(messages) {
-    // Clear current list
-    messageList.innerHTML = "";
-
-    // Render messages
-    messages.forEach((msg) => {
-      const li = document.createElement("li");
-      li.innerHTML = `<strong>${msg.name}:</strong> ${msg.message}`;
-      messageList.appendChild(li);
-    });
+    userNameInput.value = '';
+    userMessageInput.value = '';
   }
 });
+
+function updateMessageList() {
+  messageList.innerHTML = '';
+  archivedMessages.innerHTML = '';
+
+  const currentMessages = allMessages.slice(0, 20);
+  currentMessages.forEach((msg) => {
+    const li = document.createElement('li');
+    li.innerHTML = <strong>${msg.name}:</strong> ${msg.message};
+    messageList.appendChild(li);
+  });
+
+  const olderMessages = allMessages.slice(20);
+  if (olderMessages.length > 0) {
+    archivedSection.style.display = 'block';
+    olderMessages.forEach((msg) => {
+      const li = document.createElement('li');
+      li.innerHTML = <strong>${msg.name}:</strong> ${msg.message};
+      archivedMessages.appendChild(li);
+    });
+  } else {
+    archivedSection.style.display = 'none';
+  }
+}
+
+updateMessageList();
+
 
 document.addEventListener("DOMContentLoaded", () => {
     const gallerySection = document.querySelector(".gallery");
@@ -182,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setSliderPosition() {
-        carousel.style.transform = `translateX(${currentTranslate}px)`;
+        carousel.style.transform = translateX(${currentTranslate}px);
     }
 
     function setPositionByIndex() {
@@ -190,4 +168,4 @@ document.addEventListener("DOMContentLoaded", () => {
         prevTranslate = currentTranslate;
         setSliderPosition();
     }
-});
+}); 
