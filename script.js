@@ -11,13 +11,11 @@ function calculateAge() {
   const birthYear = birthDate.getFullYear();
   const currentYear = today.getFullYear();
   
-  // Calculate initial age
   let age = currentYear - birthYear;
 
-  // Check if the birthday has occurred this year
   const birthdayThisYear = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
   if (today < birthdayThisYear) {
-    age -= 1; // Subtract 1 if the birthday hasn't occurred yet
+    age -= 1;
   }
   
   return age;
@@ -59,7 +57,7 @@ function updateMessageList() {
   const currentMessages = allMessages.slice(0, 20);
   currentMessages.forEach((msg) => {
     const li = document.createElement('li');
-    li.innerHTML = <strong>${msg.name}:</strong> ${msg.message};
+    li.innerHTML = `<strong>${msg.name}:</strong> ${msg.message}`;
     messageList.appendChild(li);
   });
 
@@ -68,7 +66,7 @@ function updateMessageList() {
     archivedSection.style.display = 'block';
     olderMessages.forEach((msg) => {
       const li = document.createElement('li');
-      li.innerHTML = <strong>${msg.name}:</strong> ${msg.message};
+      li.innerHTML = `<strong>${msg.name}:</strong> ${msg.message}`;
       archivedMessages.appendChild(li);
     });
   } else {
@@ -76,7 +74,7 @@ function updateMessageList() {
   }
 }
 
-updateMessageList(); 
+updateMessageList();
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -162,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setSliderPosition() {
-        carousel.style.transform = translateX(${currentTranslate}px);
+        carousel.style.transform = `translateX(${currentTranslate}px)`;
     }
 
     function setPositionByIndex() {
@@ -170,4 +168,4 @@ document.addEventListener("DOMContentLoaded", () => {
         prevTranslate = currentTranslate;
         setSliderPosition();
     }
-}); 
+});
