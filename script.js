@@ -3,103 +3,101 @@ document.addEventListener("DOMContentLoaded", () => {
     header.classList.add("fade-in");
 });
 
-const birthDate = new Date("2001-01-10");
-const ageElement = document.getElementById("age");
+document.addEventListener("DOMContentLoaded", () => {
+  const birthDate = new Date("2001-01-10");
+  const ageElement = document.getElementById("age");
 
-function calculateAge() {
-  const today = new Date();
-  const birthYear = birthDate.getFullYear();
-  const currentYear = today.getFullYear();
-  
-  let age = currentYear - birthYear;
+  function calculateAge() {
+    const today = new Date();
+    const birthYear = birthDate.getFullYear();
+    const currentYear = today.getFullYear();
 
-  const birthdayThisYear = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
-  if (today < birthdayThisYear) {
-    age -= 1;
-  }
-  
-  return age;
-}
+    let age = currentYear - birthYear;
 
-ageElement.textContent = calculateAge();
-
-// Import and configure Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// DOM Elements
-const messageForm = document.getElementById("messageForm");
-const userNameInput = document.getElementById("userName");
-const userMessageInput = document.getElementById("userMessage");
-const messageList = document.getElementById("messageList").querySelector("ul");
-const archivedSection = document.getElementById("archivedMessages");
-const archivedMessages = archivedSection.querySelector("ul");
-
-// Firestore collection reference
-const messagesCollection = collection(db, "messages");
-
-// Submit message
-messageForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const userName = userNameInput.value.trim();
-  const userMessage = userMessageInput.value.trim();
-
-  if (userName && userMessage) {
-    try {
-      // Add message to Firestore
-      await addDoc(messagesCollection, {
-        name: userName,
-        message: userMessage,
-        timestamp: new Date(), // Add a timestamp
-      });
-
-      // Clear form
-      userNameInput.value = "";
-      userMessageInput.value = "";
-    } catch (error) {
-      console.error("Error adding message: ", error);
+    const birthdayThisYear = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+    if (today < birthdayThisYear) {
+      age -= 1;
     }
+
+    return age;
+  }
+
+  ageElement.textContent = calculateAge();
+
+  // Firebase Initialization
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCSqU4pgisamP0COljueM41yNsg3SfISzw",
+    authDomain: "happy-birthday-e2a9b.firebaseapp.com",
+    projectId: "happy-birthday-e2a9b",
+    storageBucket: "happy-birthday-e2a9b.appspot.com",
+    messagingSenderId: "104922178251",
+    appId: "1:104922178251:web:ff25bb5231c48cfd77314e",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // DOM Elements
+  const messageForm = document.getElementById("messageForm");
+  const userNameInput = document.getElementById("userName");
+  const userMessageInput = document.getElementById("userMessage");
+  const messageList = document.getElementById("messageList").querySelector("ul");
+
+  // Firestore collection reference
+  const messagesCollection = collection(db, "messages");
+
+  // Submit message
+  messageForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const userName = userNameInput.value.trim();
+    const userMessage = userMessageInput.value.trim();
+
+    if (userName && userMessage) {
+      try {
+        // Add message to Firestore
+        await addDoc(messagesCollection, {
+          name: userName,
+          message: userMessage,
+          timestamp: new Date(), // Add a timestamp
+        });
+
+        // Clear form
+        userNameInput.value = "";
+        userMessageInput.value = "";
+      } catch (error) {
+        console.error("Error adding message: ", error);
+      }
+    }
+  });
+
+  // Listen for new messages
+  const messagesQuery = query(messagesCollection, orderBy("timestamp", "desc"));
+  onSnapshot(messagesQuery, (snapshot) => {
+    const currentMessages = [];
+    snapshot.forEach((doc) => {
+      currentMessages.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Render messages
+    renderMessages(currentMessages);
+  });
+
+  function renderMessages(messages) {
+    // Clear current list
+    messageList.innerHTML = "";
+
+    // Render messages
+    messages.forEach((msg) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${msg.name}:</strong> ${msg.message}`;
+      messageList.appendChild(li);
+    });
   }
 });
-
-// Listen for new messages
-const messagesQuery = query(messagesCollection, orderBy("timestamp", "desc"), limit(20));
-onSnapshot(messagesQuery, (snapshot) => {
-  const currentMessages = [];
-  snapshot.forEach((doc) => {
-    currentMessages.push({ id: doc.id, ...doc.data() });
-  });
-
-  // Render messages
-  renderMessages(currentMessages);
-});
-
-function renderMessages(messages) {
-  // Clear current list
-  messageList.innerHTML = "";
-
-  // Render messages
-  messages.forEach((msg) => {
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${msg.name}:</strong> ${msg.message}`;
-    messageList.appendChild(li);
-  });
-}
 
 
 document.addEventListener("DOMContentLoaded", () => {
